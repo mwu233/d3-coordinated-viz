@@ -1,4 +1,4 @@
-Country,Satisfaction with financial situation,Satisfaction with job,Satisfaction with commuting time,Satisfaction with time use,Overall life satisfaction,Satisfaction with recreational and green areas,Satisfaction with living environment,Satisfaction with personal relationships,Meaning of life
+SOVEREIGNT,Satisfaction with financial situation,Satisfaction with job,Satisfaction with commuting time,Satisfaction with time use,Overall life satisfaction,Satisfaction with recreational and green areas,Satisfaction with living environment,Satisfaction with personal relationships,Meaning of life
 Austria,7,8,8,7.3,7.8,8.3,8.4,8.5,7.9
 Belgium,6.9,7.5,7.6,7.1,7.6,7.3,7.6,7.7,7.6
 Bulgaria,3.7,6,5.9,5.7,4.8,5.2,5.2,5.7,6.1
@@ -22,11 +22,11 @@ Norway,7.5,8,8.2,7.2,7.9,8.5,8.3,8.4,8
 Poland,5.7,7.3,7.5,6.8,7.3,7.5,7.6,8,7.6
 Portugal,4.5,7,7.5,6.5,6.2,6,6.3,7.9,7.5
 Romania,6.2,7,7.1,6.8,7.1,7,7.4,7.6,7.3
-Republic of Serbia,4,6,6.7,6.2,4.9,5.4,5,8.2,7
+Republic_of_Serbia,4,6,6.7,6.2,4.9,5.4,5,8.2,7
 Slovakia,5.5,7.2,7.3,6.9,7,6.8,6.9,7.9,7.5
 Slovenia,5.6,7.3,7.8,6.8,7,7.9,7.7,8.3,7.9
 Spain,5.8,6.9,7.1,6.6,6.9,6.6,7.2,7.8,7.5
 Sweden,7.5,7.7,7.9,7.4,7.9,8.4,7.6,8.3,7.8
 Switzerland,7.6,7.9,8.2,7,8,8.4,7.9,8.7,7.9
 Turkey,4.9,6.1,6.4,5.6,5.7,5.8,6.2,7.4,6.4
-United Kingdom,6.2,7,7.5,6.9,7.3,7.6,7.8,8.3,7.7
+United_Kingdom,6.2,7,7.5,6.9,7.3,7.6,7.8,8.3,7.7
