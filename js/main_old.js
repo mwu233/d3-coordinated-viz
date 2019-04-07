@@ -38,7 +38,7 @@
     //create a scale to size bars proportionally to frame and for axis
     var yScale = d3.scaleLinear()
         .range([590, 0])
-        .domain([4.5, 8.5]);
+        .domain([3.5, 9]);
 
     //begin script when window loads
     window.onload = setMap();
@@ -283,11 +283,11 @@
         
         //create a text element for the chart title
         var chartTitle = chart.append("text")
-            .attr("x", 60)
+            .attr("x", 40)
             .attr("y", 30)
             .attr("class", "chartTitle")
             .text(expressed + " in Europen Union, 2013");
-        
+
         //create vertical axis generator
         var yAxis = d3.axisLeft()
             .scale(yScale);
@@ -363,38 +363,10 @@
             })
             .duration(500);
 
-        //function to adjust y-axis range in chart
-        updateYaxis(csvData);
-        
-        //function to position, size, and color bars in chart
         updateChart(bars, csvData.length, colorScale);
         
     };//end of changeAttribute()
     
-    //function to adjust y-axis range after the expressed attribute is changed
-    function updateYaxis(csvData){
-        //build array of all values of the expressed attribute
-        var domainArray = [];
-        for (var i=0; i<csvData.length; i++){
-            var val = parseFloat(csvData[i][expressed]);
-            domainArray.push(val);
-        };
-        var min = Math.round(d3.min(domainArray));
-        var max = Math.round(d3.max(domainArray));
-        
-        yScale = d3.scaleLinear()
-            .range([590, 0])
-            .domain([min-0.5, max+0.5]);
-        
-        //create vertical axis generator
-        var yAxis = d3.axisLeft()
-            .scale(yScale);
-
-        //place axis
-        var axis = d3.selectAll(".axis")
-            .attr("transform", translate)
-            .call(yAxis);
-    }
     
     //function to position, size, and color bars in chart
     function updateChart(bars, n, colorScale){
