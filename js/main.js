@@ -39,7 +39,15 @@
     var yScale = d3.scaleLinear()
         .range([590, 0])
         .domain([4.5, 8.5]);
-
+    
+    var colorClasses = [
+        "#D4B9DA",
+        "#C994C7",
+        "#DF65B0",
+        "#DD1C77",
+        "#980043"
+    ];
+    
     //begin script when window loads
     window.onload = setMap();
 
@@ -54,7 +62,13 @@
             .append("svg")
             .attr("class", "map")
             .attr("width", width)
-            .attr("height", height);
+            .attr("height", height)
+            .call(d3.zoom()
+                    .scaleExtent([0.3,8])
+                    .on("zoom", function () {
+                                map.attr("transform", d3.event.transform);
+                    }))
+            .append("g");
 
         //create Albers equal area conic projection centered on France
         var projection = d3.geoAlbers()
@@ -109,8 +123,11 @@
             //add enumeration units to the map
             setEnumerationUnits(europeCountries, map, path, colorScale);
             
-            //add coordinated visualization to the map
+            //add a coordinated bar chart to the map
             setChart(csvData, colorScale);
+            
+            //add a coordinated legend to the map
+            setLegend(csvData, colorScale);
             
             //create a drop-down menu
             createDropdown(csvData);
@@ -172,18 +189,23 @@
     
     //function to create color scale generator
     function makeColorScale(csvData){
-        var colorClasses = [
-            "#D4B9DA",
-            "#C994C7",
-            "#DF65B0",
-            "#DD1C77",
-            "#980043"
-        ];
 
         //create color scale generator
-        var colorScale = d3.scaleQuantile()
+        var colorScale = d3.scaleThreshold()
             .range(colorClasses);
         
+        var domainArray = makeDomainArray(csvData);
+        
+        //remove first value from domain array to create class breakpoints
+        domainArray.shift();
+        
+        //assign array of last 4 cluster minimums as domain
+        colorScale.domain(domainArray);
+        
+        return colorScale;
+    };
+    
+    function makeDomainArray(csvData){
         //build array of all values of the expressed attribute
         var domainArray = [];
         for (var i=0; i<csvData.length; i++){
@@ -196,15 +218,9 @@
         domainArray = clusters.map(function(d){
             return d3.min(d);
         });
-        //remove first value from domain array to create class breakpoints
-        //console.log("break down by min values: "+domainArray);
-        domainArray.shift();
         
-        //assign array of last 4 cluster minimums as domain
-        colorScale.domain(domainArray);
-        
-        return colorScale;
-    };
+        return domainArray;
+    }
     
     function setEnumerationUnits(europeCountries, map, path, colorScale){
         //...REGIONS BLOCK FROM MODULE 8
@@ -268,7 +284,7 @@
             .enter()
             .append("rect")
             .sort(function(a, b){
-                return b[expressed]-a[expressed]
+                return b[expressed]-a[expressed];
             })
             .attr("class", function(d){
                 return "bar " + d.SOVEREIGNT;
@@ -309,7 +325,45 @@
         updateChart(bars, csvData.length, colorScale);
         
     }; //end of setChart()
+    
+    function setLegend(csvData, colorScale){
+        
+        //build array of all values of the expressed attribute
+        var domainArray = makeDomainArray(csvData);
+        
+        var legend = d3.select("body")
+                        .append("svg")
+                        .attr("class", "legend")
+                        .attr("width", 90)
+                        .attr("height", 100)
+                        .selectAll("g")
+                        .data(domainArray.slice())
+                        .enter()
+                        .append("g")
+                        .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
+        legend.append("rect")
+              .attr("width", 18)
+              .attr("height", 18)
+              .style("fill", colorScale);
+        
+        var rangeArray = [];
+        var nClasses = domainArray.length;
+        for(var i=0; i < nClasses-1; i++){
+            rangeArray[i] = domainArray[i] + " - " + Math.round( (domainArray[i+1]-0.1) * 100 ) / 100;
+        }
+        rangeArray[nClasses-1] = domainArray[nClasses-1] + "+"
+        
+        var legendTexts = legend.append("text")
+                            .data(rangeArray)
+                            .attr("class","legendTexts")
+                            .attr("x", 24)
+                            .attr("y", 9)
+                            .attr("dy", ".35em")
+                            .text(function(d) { return d; });
+        
+    }
+    
     //function to create a dropdown menu for attribute selection
     function createDropdown(csvData){
         //add select element
@@ -369,6 +423,9 @@
         //function to position, size, and color bars in chart
         updateChart(bars, csvData.length, colorScale);
         
+        //function to update legend
+        updateLegend(csvData);
+        
     };//end of changeAttribute()
     
     //function to adjust y-axis range after the expressed attribute is changed
@@ -420,12 +477,31 @@
         
     };// end of updateChart
     
+    function updateLegend(csvData){
+        //build array of all values of the expressed attribute
+        var domainArray = makeDomainArray(csvData);
+
+        var rangeArray = [];
+        var nClasses = domainArray.length;
+        for(var i=0; i < nClasses-1; i++){
+            rangeArray[i] = domainArray[i] + " - " + Math.round( (domainArray[i+1]-0.1) * 100 ) / 100;
+        }
+        rangeArray[nClasses-1] = domainArray[nClasses-1] + "+"
+        
+        var legendTexts = d3.selectAll(".legendTexts")
+                            .data(rangeArray)
+                            .attr("x", 24)
+                            .attr("y", 9)
+                            .attr("dy", ".35em")
+                            .text(function(d) { return d; });
+    }
+    
     //function to highlight enumeration units and bars
     function highlight(props){
         //change stroke
         var selected = d3.selectAll("." + props.SOVEREIGNT)
             .style("stroke", "blue")
-            .style("stroke-width", "2px");
+            .style("stroke-width", "3px");
         setLabel(props);
     };
     

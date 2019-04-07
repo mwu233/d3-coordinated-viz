@@ -13,7 +13,7 @@
 
 .chartTitle {
     font-family: sans-serif;
-    font-size: 1.2em;
+    font-size: 1em;
     font-weight: bold;
 }
 
@@ -52,6 +52,7 @@
     fill: #FFF;
     stroke: #CCC;
     stroke-width: 1.5px;
+    fill-opacity: .8;
 }
 
 .gratLines {
@@ -61,7 +62,7 @@
 }
 
 .gratBackground {
-    fill: #D5E3FF;
+    fill: #AED6F1;
 }
 
 .eu {
@@ -72,7 +73,7 @@
 
 .dropdown {
     position: absolute;
-    top: 30px;
+    top: 100px;
     left: 40px;
     z-index: 10; /*a z-index of 10 ensures that it floats to the top of all other elements on the page */
     font-family: sans-serif;
@@ -104,4 +105,66 @@ option {
     padding: 0;
     display: inline-block;
     line-height: 1em;
+}
+
+.legend {
+    position: absolute;
+    top: 140px;
+    left: 40px;
+    z-index: 10; /*a z-index of 10 ensures that it floats to the top of all other elements on the page */
+    background-color: ghostwhite;
+    padding: 2px;
+    border: 1px solid #999;
+    box-shadow: 2px 2px 4px #999;
+}
+
+.legend text {
+    font-family: sans-serif;
+    font-size: 0.95em;
+    font-weight: bold;
+}
+
+
+h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.navbar-title {
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    display: inline-block;
+    color: white;
+    text-decoration: none;
+}
+
+.navbar-title:hover {
+    color: #980043;
+}
+
+.navbar-text{
+    font-size: 25px;
+    padding: 4px;
+	font-family: sans-serif;
+    border: 3px solid white;
+    background-color: #C0C0C0;
+    text-align:center;
+}
+
+.navbar-meta {
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    font-size: 15px;
+	font-family: sans-serif;
+    text-align:center;
+    padding-right: 5px;
+}
+
+pre {
+    font-size: .7rem;
+    margin: 0;
 }
