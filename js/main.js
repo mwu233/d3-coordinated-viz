@@ -496,10 +496,18 @@
                             .text(function(d) { return d; });
     }
     
+    // https://github.com/wbkd/d3-extended
+    d3.selection.prototype.moveToFront = function() {  
+      return this.each(function(){
+        this.parentNode.appendChild(this);
+      });
+    };
+    
     //function to highlight enumeration units and bars
     function highlight(props){
         //change stroke
         var selected = d3.selectAll("." + props.SOVEREIGNT)
+            .moveToFront()
             .style("stroke", "blue")
             .style("stroke-width", "3px");
         setLabel(props);
