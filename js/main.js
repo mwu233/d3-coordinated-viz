@@ -13,7 +13,8 @@
 (function(){
 
     //pseudo-global variables
-    //variables for data join
+    
+    //variable names, i.e., attributes of geofeatures 
     var attrArray = ["Satisfaction with financial situation", 
                      "Satisfaction with job", 
                      "Satisfaction with commuting time", 
@@ -23,7 +24,7 @@
                      "Satisfaction with personal relationships",
                      "Overall life satisfaction",
                      "Meaning of life"];
-    var expressed = attrArray[7]; //initial attribute
+    var expressed = attrArray[7]; //initial attribute: Overall life satisfaction
     
     //chart frame dimensions
     var chartWidth = window.innerWidth * 0.425,
@@ -40,6 +41,7 @@
         .range([590, 0])
         .domain([4.5, 8.5]);
     
+    //color scheme
     var colorClasses = [
         "#D4B9DA",
         "#C994C7",
@@ -47,17 +49,19 @@
         "#DD1C77",
         "#980043"
     ];
+    // end of pseudo-global variables
+    
     
     //begin script when window loads
     window.onload = setMap();
 
-    //set up choropleth map
+    //set up the choropleth map
     function setMap(){
         //map frame dimensions
         var width = window.innerWidth * 0.5,
             height = 600;
 
-        //create new svg container for the map
+        //create new svg container within body for the map 
         var map = d3.select("body")
             .append("svg")
             .attr("class", "map")
@@ -70,22 +74,23 @@
                     }))
             .append("g");
 
-        //create Albers equal area conic projection centered on France
+        //create Albers equal area conic projection centered on Europe
         var projection = d3.geoAlbers()
             .center([0, 55])
             .rotate([-15, 0, 0])
             .parallels([43, 62])
             .scale(650)
             .translate([width / 2, height / 2]);
-
+        
+        //create projected geoPath for the geofeatures
         var path = d3.geoPath()
             .projection(projection);
 
         //use Promise.all to parallelize asynchronous data loading
         var promises = [];
         promises.push(d3.csv("data/Average rating of satisfactions 2013_EU_31Countries.csv")); //load attributes from csv
-        promises.push(d3.json("data/countries.topojson")); //load background spatial data
-        promises.push(d3.json("data/EU_31.topojson")); //load choropleth spatial data
+        promises.push(d3.json("data/countries.topojson")); //load background spatial data, all countries in the map 
+        promises.push(d3.json("data/EU_31.topojson")); //load choropleth spatial data, only European countries
         Promise.all(promises).then(callback);
 
         function callback(data){
@@ -108,13 +113,13 @@
             /*console.log(worldCountries);
             console.log(europeCountries);*/
 
-            //add background countries to map
+            //append projected path to the map, and add background countries to the projected path
             var bgCountries = map.append("path")
                 .datum(worldCountries)
                 .attr("class", "bgCountries")
                 .attr("d", path);
 
-            //join csv data to GeoJSON enumeration units
+            //join csv data to TopoJSON enumeration units
             europeCountries = joinData(europeCountries, csvData);
             
             //create the color scale
@@ -143,47 +148,48 @@
 
         //create graticule background
         var gratBackground = map.append("path")
-            .datum(graticule.outline()) //bind graticule background
-            .attr("class", "gratBackground") //assign class for styling
-            .attr("d", path) //project graticule
+            .datum(graticule.outline()) //bind graticule background to the projected path 
+            .attr("class", "gratBackground") //assign class for styling, i.e., make it blue
+            .attr("d", path) //project graticule (background)
 
         //create graticule lines
         var gratLines = map.selectAll(".gratLines") //select graticule elements that will be created
             .data(graticule.lines()) //bind graticule lines to each element to be created
             .enter() //create an element for each datum
-            .append("path") //append each element to the svg as a path element
+            .append("path") //append each element to the svg as a projected path element
             .attr("class", "gratLines") //assign class for styling
             .attr("d", path); //project graticule lines
     };
     
     function joinData(europeCountries, csvData){
-        //...DATA JOIN LOOPS FROM EXAMPLE 1.1
-        //loop through csv to assign each set of csv attribute values to geojson region
-            for (var i=0; i<csvData.length; i++){
-                var csvCountry = csvData[i]; //the current region
-                var csvKey = csvCountry["SOVEREIGNT"]; //the CSV primary key
+        
+        //loop through csv to assign each set of csv attribute values to geojson EU countries
+        for (var i=0; i<csvData.length; i++){
+            var csvCountry = csvData[i]; //the current country
+            var csvKey = csvCountry["SOVEREIGNT"]; //the CSV primary key - the country name
 
-                //loop through geojson regions to find correct region
-                for (var a=0; a<europeCountries.length; a++){
+            //loop through geojson EU countries to find the corresponding one
+            for (var a=0; a<europeCountries.length; a++){
 
-                    var geojsonProps = europeCountries[a].properties; //the current euCountries geojson properties
-                    var geojsonKey = geojsonProps.SOVEREIGNT; //the geojson primary key
+                var geojsonProps = europeCountries[a].properties; //the current euCountries geojson properties
+                var geojsonKey = geojsonProps.SOVEREIGNT; //the geojson primary key - the country name
 
-                    //where primary keys match, transfer csv data to geojson properties object
-                    if (geojsonKey == csvKey){
+                //where primary keys match, transfer csv data to geojson properties object
+                if (geojsonKey == csvKey){
 
-                        //assign all attributes and values
-                        attrArray.forEach(function(attr){
-                            var val = parseFloat(csvCountry[attr]); //get csv attribute value
-                            geojsonProps[attr] = val; //assign attribute and value to geojson properties
-                            //console.log(val);
+                    //assign all attributes and values
+                    attrArray.forEach(function(attr){
+                        var val = parseFloat(csvCountry[attr]); //get csv attribute value
+                        geojsonProps[attr] = val; //assign attribute and value to geojson properties
+                        //console.log(val);
 
-                        });
-                    };
-                    //console.log("next");
+                    });
                 };
-
+                //console.log("next");
             };
+
+        };
+        // return the geojson EU countries with the added csv attributes/variables
         return europeCountries;
     };
     
@@ -194,6 +200,7 @@
         var colorScale = d3.scaleThreshold()
             .range(colorClasses);
         
+        //create a domain array for this expressed attribute
         var domainArray = makeDomainArray(csvData);
         
         //remove first value from domain array to create class breakpoints
@@ -205,6 +212,7 @@
         return colorScale;
     };
     
+    //create a domain array for the current expressed attribute
     function makeDomainArray(csvData){
         //build array of all values of the expressed attribute
         var domainArray = [];
@@ -278,7 +286,7 @@
             .attr("height", chartInnerHeight)
             .attr("transform", translate);
 
-        //set bars for each province
+        //set bars for each country
         var bars = chart.selectAll(".bar")
             .data(csvData)
             .enter()
@@ -328,9 +336,10 @@
     
     function setLegend(csvData, colorScale){
         
-        //build array of all values of the expressed attribute
+        //build array of all values of the current expressed attribute
         var domainArray = makeDomainArray(csvData);
         
+        // create an svg for legend
         var legend = d3.select("body")
                         .append("svg")
                         .attr("class", "legend")
@@ -341,12 +350,14 @@
                         .enter()
                         .append("g")
                         .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
-
+        
+        // append a rectangle background for the legend
         legend.append("rect")
               .attr("width", 18)
               .attr("height", 18)
               .style("fill", colorScale);
         
+        // set up the range of each class, and store the ranges into an array
         var rangeArray = [];
         var nClasses = domainArray.length;
         for(var i=0; i < nClasses-1; i++){
@@ -354,6 +365,7 @@
         }
         rangeArray[nClasses-1] = domainArray[nClasses-1] + "+"
         
+        // append the rangeArray as text for the legend
         var legendTexts = legend.append("text")
                             .data(rangeArray)
                             .attr("class","legendTexts")
@@ -394,7 +406,7 @@
         //change the expressed attribute
         expressed = attribute;
 
-        //recreate the color scale
+        //recreate the color scale based on the new expressed attribute
         var colorScale = makeColorScale(csvData);
 
         //recolor enumeration units
@@ -478,9 +490,10 @@
     };// end of updateChart
     
     function updateLegend(csvData){
-        //build array of all values of the expressed attribute
+        //build array of all values of the current/updated expressed attribute
         var domainArray = makeDomainArray(csvData);
-
+        
+        // set up the range of each class, and store the ranges into an array
         var rangeArray = [];
         var nClasses = domainArray.length;
         for(var i=0; i < nClasses-1; i++){
@@ -488,6 +501,7 @@
         }
         rangeArray[nClasses-1] = domainArray[nClasses-1] + "+"
         
+        // update the range of each class in the legend
         var legendTexts = d3.selectAll(".legendTexts")
                             .data(rangeArray)
                             .attr("x", 24)
@@ -496,6 +510,7 @@
                             .text(function(d) { return d; });
     }
     
+    // function to moveToFront when highlighting
     // https://github.com/wbkd/d3-extended
     d3.selection.prototype.moveToFront = function() {  
       return this.each(function(){
